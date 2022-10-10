@@ -2,10 +2,11 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
 from Crypto.Util import number
+import binascii
 import hashlib
 import sys
 
-PRIME_LEN = 2048 # Length of prime numbers to be used
+PRIME_LEN = 512 # Length of prime numbers to be used
 
 def rsa_encrypt(M, PU):
     # M = Plaintext as int
@@ -49,14 +50,15 @@ def main():
     PR = [d,n]
 
     # Create string, convert to int, then encrypt
-    M = int("Hello".encode('utf-8').hex(), 16)
+    M = int(binascii.hexlify("Hello".encode('utf-8')), 16)
     C = rsa_encrypt(M, PU)
 
     # Decrypt message as int, then convert back to ascii string
-    C_out = rsa_decrypt(C, PR)
-    C_hex = hex(C_out)[2:] # Remove '0x' from hex string
-    msg_out = bytes.fromhex(C_hex).decode('utf-8')
-    
+    C_out = int(rsa_decrypt(C, PR))
+    C_hex = hex(C_out)
+    print(C_hex)
+    msg_out = (binascii.unhexlify(C_hex)).decode('utf-8')
+
     print(msg_out)
 
 if __name__ == '__main__':
