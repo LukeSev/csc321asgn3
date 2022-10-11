@@ -17,9 +17,17 @@ def main():
     a = 11
     b = 12
 
+    # # Mallory modifies g (Attack 2)
+    # g = 1
+
     # Calculate public keys
     A = keyComp(p, g, a)
     B = keyComp(p, g, b)
+
+    # Mallory modifies A and B (ATTACK 1)
+    A = p
+    B = p
+    print("\nMallory changes the keys A and B to the value p")
 
     # Now generate secret keys using others' public key
     s_A = int(keyComp(p, B, a))
@@ -29,6 +37,7 @@ def main():
     hash_B = hashlib.sha256(s_B.to_bytes(sys.getsizeof(s_B), "big")) # convert secret key to bytes before SHA-256
     k_B = hash_B.hexdigest()[:16] # Truncate to 16 bytes
 
+    print("Then when s is computed by both parties, the value comes out to be", s_A)
     # Test if same key is computed
     if k_A == k_B:
         print("\nAlice's and Bob's keys are EQUAL")

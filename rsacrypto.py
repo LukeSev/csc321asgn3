@@ -65,6 +65,9 @@ def main():
         print("\n\nX's ARE NOT EQUAL\n\n")
     if(k_A != k_B):
         print("\n\nKEYS ARE NOT EQUAL\n\n")
+    else:
+        print("\nKeys are EQUAL")
+
     test_msg = "Hello Bob"
     cbc_iv = get_random_bytes(16)
     cipher_A = AES.new(bytes(k_A, encoding='utf-8'), AES.MODE_CBC, cbc_iv)
