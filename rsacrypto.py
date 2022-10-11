@@ -6,31 +6,27 @@ import binascii
 import hashlib
 import sys
 
-PRIME_LEN = 512 # Length of prime numbers to be used
+PRIME_LEN = 2048 # Length of prime numbers to be used
 
-def rsa_encrypt(M, PU):
+def rsa_encrypt(x, PU):
     # M = Plaintext as int
     # PU = Public Key
     e = PU[0]
     n = PU[1]
     
-    """ if(M < n): # necessary condition
-        return (M**e) % n
-    else:
-        return 0 """
+    # if(M < n): # necessary condition
+    #     return (M**e) % n
+    # else:
+    #     return 0
 
-    return (M**e) % n
+    return pow(x, e, n)
 
-def rsa_decrypt(C, PR):
+def rsa_decrypt(y, PR):
     # C = Ciphertext as int
     # PR = Private Key
     d = PR[0]
     n = PR[1]
-    print(C)
-    print(d)
-    print(n)
-    return (C**d) % n
-
+    return pow(y, d, n)
 
 def main():
     # First, select/generate large primes
@@ -43,23 +39,40 @@ def main():
     phi_n = (p-1) * (q-1)
 
     # Calculate d
-    d = 1 / (e % phi_n)
+    # d = 1 / (e % phi_n)
+    d = pow(e, -1, phi_n)
 
-    # Create public (PU) and private (PR) keys
+    # Alice: Create public (PU) and private (PR) keys
     PU = [e,n]
     PR = [d,n]
 
-    # Create string, convert to int, then encrypt
-    M = int(binascii.hexlify("Hello".encode('utf-8')), 16)
-    C = rsa_encrypt(M, PU)
+    # Bob: Create random number to be used to create key
+    x_B = int(number.getPrime(PRIME_LEN))
+    while x_B >= n:
+        x_B = number.getPrime(PRIME_LEN)
+    y = rsa_encrypt(x_B, PU)
 
-    # Decrypt message as int, then convert back to ascii string
-    C_out = int(rsa_decrypt(C, PR))
-    C_hex = hex(C_out)
-    print(C_hex)
-    msg_out = (binascii.unhexlify(C_hex)).decode('utf-8')
+    # Alice: Generate x using y given by Bob
+    x_A = rsa_decrypt(y, PR)
 
-    print(msg_out)
+    # Alice & Bob: Generate key k with respective calculated x
+    h_A = hashlib.sha256(int(x_A).to_bytes(sys.getsizeof(x_A), "big"))
+    k_A = h_A.hexdigest()[:16]
+    h_B = hashlib.sha256(int(x_B).to_bytes(sys.getsizeof(x_B), "big"))
+    k_B = h_B.hexdigest()[:16]
+
+    if(x_A != x_B):
+        print("\n\nX's ARE NOT EQUAL\n\n")
+    if(k_A != k_B):
+        print("\n\nKEYS ARE NOT EQUAL\n\n")
+    test_msg = "Hello Bob"
+    cbc_iv = get_random_bytes(16)
+    cipher_A = AES.new(bytes(k_A, encoding='utf-8'), AES.MODE_CBC, cbc_iv)
+    cipher_B = AES.new(bytes(k_B, encoding='utf-8'), AES.MODE_CBC, cbc_iv)
+    ciphertext = cipher_A.encrypt(pad(test_msg.encode(), 16))
+    plaintext = unpad(cipher_B.decrypt(ciphertext), 16).decode()
+    print(plaintext)
+
 
 if __name__ == '__main__':
     main()
