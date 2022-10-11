@@ -36,11 +36,15 @@ def main():
     s_B = int(keyComp(p, A, b))
     hash_B = hashlib.sha256(s_B.to_bytes(sys.getsizeof(s_B), "big")) # convert secret key to bytes before SHA-256
     k_B = hash_B.hexdigest()[:16] # Truncate to 16 bytes
+    s_M = int(keyComp(p, p, b))
+    hash_M = hashlib.sha256(s_M.to_bytes(sys.getsizeof(s_M), "big")) # convert secret key to bytes before SHA-256
+    k_M = hash_M.hexdigest()[:16] # Truncate to 16 bytes
 
-    print("Then when s is computed by both parties, the value comes out to be", s_A)
+    print("Then when the key is computed by both parties, the Mallory can create the same key:\n")
+    print("Alice's Key:", k_A, "Bob's Key:", k_B, "Mallory's Key:", k_M)
     # Test if same key is computed
     if k_A == k_B:
-        print("\nAlice's and Bob's keys are EQUAL")
+        print("\nAlice's and Bob's keys are EQUAL and now Mallory can decrypt their messages")
     else:
         print("\nAlice's and Bob's keys are NOT EQUAL")
 
